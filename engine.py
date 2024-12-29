@@ -56,8 +56,9 @@ class Chariot(Piece):
 
 class Board:
   def __init__(self):
-    self.red_pieces = [Soldier(side=True), Cannon(side=True), General(side=True), Advisor(side=True), Elephant(side=True), Horse(side=True), Chariot(side=True)]
-    self.black_pieces = [Soldier(side=False), Cannon(side=False), General(side=False), Advisor(side=False), Elephant(side=False), Horse(side=False), Chariot(side=False)]
+    piece_types = [Soldier, Cannon, General, Advisor, Elephant, Horse, Chariot]
+    self.red_pieces: list[Piece] = [piece(side=True) for piece in piece_types]
+    self.black_pieces: list[Piece] = [piece(side=False) for piece in piece_types]
   
   def comb(self):
     from functools import reduce
