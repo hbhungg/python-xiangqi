@@ -5,6 +5,8 @@ from typing import Optional
 
 RANKS = 10
 FILES = 9
+
+# TODO: This need refractor
 STARTING_POSITION = {
   "RED_SOLDIER"    : 0b000000000_000000000_000000000_000000000_000000000_000000000_101010101_000000000_000000000_000000000,
   "RED_CANNON"     : 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_010000010_000000000_000000000,
@@ -35,6 +37,7 @@ class Piece:
   def __init__(self, side: Side):
     piece_name = self.__class__.NAME
     self.side = side
+    # TODO: This need refractor
     self.bit = STARTING_POSITION[f"RED_{piece_name}"] if side == Side.RED else STARTING_POSITION[f"BLACK_{piece_name}"]
   
   def __repr__(self):
@@ -85,9 +88,3 @@ class Board:
       row = " ".join(str(s) if (s := self.at(start=(i, j))) is not None else "." for j in range(FILES))
       ret = f"{row}\n{ret}"
     return ret
-
-if __name__ == "__main__":
-  b = Board()
-  print(b)
- 
-
