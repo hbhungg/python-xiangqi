@@ -110,6 +110,8 @@ class Board:
 
   @staticmethod
   def mask(square: Square) -> int:
+    # FIXME: This might be wrong
+    # Or, my (understanding) of mapping between square and the actual bit is wrong (prob)
     return 1 << square.value
 
   def push(self, move: Move):
