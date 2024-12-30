@@ -1,4 +1,5 @@
-from xiangqi import Board
+import xiangqi
+
 
 def test_board_print():
   starting_board = """
@@ -13,5 +14,12 @@ S . S . S . S . S
 . . . . . . . . .
 C H E A G A E H C
 """
-  b = Board()
+  b = xiangqi.Board()
   assert str(b).strip() == starting_board.strip()
+
+
+def test_idk():
+  from xiangqi import PieceType
+
+  assert xiangqi.piece_symbol(PieceType.SOLDIER) == "s"
+  assert xiangqi.piece_name(PieceType.SOLDIER) == "soldier"
