@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from queue import Queue
 from typing import Optional
 from dataclasses import dataclass, field
 
@@ -86,19 +87,44 @@ class Piece:
     return s.upper() if self.color == Color.RED else s.lower()
 
 
+@dataclass
+class Move:
+  from_square: Square
+  to_square: Square
+
+
 class Board:
   def __init__(self):
     self.red_pieces: list[Piece] = [Piece(piece_type=pt, color=Color.RED) for pt in PieceType]
     self.black_pieces: list[Piece] = [Piece(piece_type=pt, color=Color.BLACK) for pt in PieceType]
     self.all_pieces = self.red_pieces + self.black_pieces
-    # self.turn = Color.RED
+    self.moves: Queue[Move] = Queue(maxsize=0)
+    self.turn = Color.RED
 
   def at(self, square: Square) -> Optional[Piece]:
-    mask = 1 << square.value
+    mask = self.mask(square)
     for piece in self.all_pieces:
       if piece.bit & mask:
         return piece
     return None
+
+  @staticmethod
+  def mask(square: Square) -> int:
+    return 1 << square.value
+
+  def push(self, move: Move):
+    piece_at = self.at(move.from_square)
+    fm = self.mask(move.from_square)
+    tm = self.mask(move.to_square)
+    print(bin(piece_at.bit), bin(fm), bin(tm))
+    piece_at.bit = piece_at.bit ^ fm
+    print(bin(piece_at.bit), bin(fm), bin(tm))
+    piece_at.bit = piece_at.bit | tm
+    print(bin(piece_at.bit), bin(fm), bin(tm))
+    self.moves.put(move)
+
+  def pop(self):
+    return self.moves.get()
 
   def __repr__(self):
     ret = ""
