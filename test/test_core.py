@@ -1,4 +1,4 @@
-from xiangqi import Move, Square, Board
+from xiangqi import Color, Move, Square, Board
 
 
 def test_board_print():
@@ -34,3 +34,10 @@ R . . . . . . . .
   b = Board()
   b.push(Move(Square.A1, Square.A2))
   assert str(b).strip() == board_state.strip()
+
+
+def test_color_at():
+  b = Board()
+  assert b.color_at(Square.A1) == Color.RED
+  assert b.color_at(Square.A10) == Color.BLACK
+  assert b.color_at(Square.A5) is None

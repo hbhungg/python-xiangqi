@@ -101,9 +101,13 @@ class Move:
 
 class Board:
   def __init__(self):
+    # TODO: Clean this mess up
     self.red_pieces: list[Piece] = [Piece(piece_type=pt, color=Color.RED) for pt in PieceType]
     self.black_pieces: list[Piece] = [Piece(piece_type=pt, color=Color.BLACK) for pt in PieceType]
-    self.occupied_color = {Color.RED: reduce(lambda x, y: x | y, self.red_pieces), Color.BLACK: reduce(lambda x, y: x | y, self.black_pieces)}
+    self.occupied_color = {
+      Color.RED: reduce(lambda x, y: x | y, [i.bit for i in self.red_pieces]),
+      Color.BLACK: reduce(lambda x, y: x | y, [i.bit for i in self.black_pieces]),
+    }
     self.occupied = self.occupied_color[Color.RED] | self.occupied_color[Color.BLACK]
     self.all_pieces = self.red_pieces + self.black_pieces
     self.moves: Queue[Move] = Queue(maxsize=0)
@@ -117,9 +121,18 @@ class Board:
         return piece
     return None
 
+  def piece_at(self, s: Square) -> PieceType:
+    pass
+
+  def color_at(self, s: Square) -> Color:
+    mask = self.mask(s)
+    if not (self.occupied & mask):
+      return None
+    return Color.RED if (self.occupied_color[Color.RED] & mask) else Color.BLACK
+
   @staticmethod
-  def mask(square: Square) -> int:
-    return 1 << square.value
+  def mask(s: Square) -> int:
+    return 1 << s.value
 
   def push(self, move: Move):
     piece_at = self.at(move.from_square)
