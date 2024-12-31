@@ -124,7 +124,10 @@ class Board:
   def piece_at(self, s: Square) -> PieceType:
     pass
 
-  def color_at(self, s: Square) -> Color:
+  def piece_type_at(self, s: Square) -> Optional[PieceType]:
+    pass
+
+  def color_at(self, s: Square) -> Optional[Color]:
     mask = self.mask(s)
     if not (self.occupied & mask):
       return None
