@@ -1,4 +1,4 @@
-from xiangqi import Color, Move, Square, Board
+from xiangqi import Color, Move, Piece, PieceType, Square, Board
 
 
 def test_board_print():
@@ -41,3 +41,16 @@ def test_color_at():
   assert b.color_at(Square.A1) == Color.RED
   assert b.color_at(Square.A10) == Color.BLACK
   assert b.color_at(Square.A5) is None
+
+def test_piece_type_at():
+  b = Board()
+  assert b.piece_type_at(Square.A1) == PieceType.CHARIOT
+  assert b.piece_type_at(Square.B1) == PieceType.HORSE
+  assert b.piece_type_at(Square.A5) is None
+
+def test_piece_at():
+  b = Board()
+  assert b.piece_at(Square.A1) == Piece(PieceType.CHARIOT, Color.RED)
+  assert b.piece_at(Square.B1) == Piece(PieceType.HORSE, Color.RED)
+  assert b.piece_at(Square.A10) == Piece(PieceType.CHARIOT, Color.BLACK)
+  assert b.piece_at(Square.A5) is None
