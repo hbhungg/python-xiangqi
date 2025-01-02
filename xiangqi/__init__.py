@@ -157,7 +157,7 @@ class Board:
     return 1 << s.value
 
   def push(self, move: Move):
-    piece_at = self.at(move.from_square)
+    piece_at = self.piece_at(move.from_square)
     fm, tm = self.mask(move.from_square), self.mask(move.to_square)
     piece_at.bit = (piece_at.bit ^ fm) | tm
     self.moves.put(move)
@@ -165,9 +165,9 @@ class Board:
   def pop(self):
     return self.moves.get()
 
-  # def __repr__(self):
-  #   ret = ""
-  #   for i in range(RANKS):
-  #     row = " ".join(str(s) if (s := self.at(square=Square(i * FILES + j))) is not None else "." for j in range(FILES))
-  #     ret = f"{row}\n{ret}"
-  #   return ret
+  def __repr__(self):
+    ret = ""
+    for i in range(RANKS):
+      row = " ".join(str(s) if (s := self.piece_at(s=Square(i * FILES + j))) is not None else "." for j in range(FILES))
+      ret = f"{row}\n{ret}"
+    return ret
