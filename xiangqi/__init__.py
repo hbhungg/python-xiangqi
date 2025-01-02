@@ -51,49 +51,38 @@ class Square(Enum):
 # fmt: on
 
 
-# fmt: off
-STARTING_POSITION: dict[Color | str, dict[Color | str, int]] = {
-   Color.RED: {
-     PieceType.SOLDIER:  0b000000000_000000000_000000000_000000000_000000000_000000000_101010101_000000000_000000000_000000000,
-     PieceType.CANNON:   0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_010000010_000000000_000000000,
-     PieceType.GENERAL:  0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000010000,
-     PieceType.ADVISOR:  0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000101000,
-     PieceType.ELEPHANT: 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_001000100,
-     PieceType.HORSE:    0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_010000010,
-     PieceType.CHARIOT:  0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_100000001,
-  },
-  Color.BLACK: {
-    PieceType.SOLDIER:   0b000000000_000000000_000000000_101010101_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.CANNON:    0b000000000_000000000_010000010_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.GENERAL:   0b000010000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.ADVISOR:   0b000101000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.ELEPHANT:  0b001000100_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.HORSE:     0b010000010_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-    PieceType.CHARIOT:   0b100000001_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
-  },
-  "MISC": {
-    "VERTICAL":          0b100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000,
-    "HORIZONTAL":        0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_111111111,
-  },
-}
-# fmt: on
-
-
-@dataclass
+@dataclass(frozen=True)
 class Piece:
   piece_type: PieceType
   color: Color
-  bit: int = field(init=False)
-
-  def __post_init__(self):
-    self.bit = STARTING_POSITION[self.color][self.piece_type]
 
   def __repr__(self):
     s = piece_symbol(self.piece_type)
     return s.upper() if self.color == Color.RED else s.lower()
 
 
-@dataclass
+BB_STARTING_POSITION: dict[Piece, int] = {
+  Piece(PieceType.SOLDIER, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_101010101_000000000_000000000_000000000,
+  Piece(PieceType.CANNON, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_010000010_000000000_000000000,
+  Piece(PieceType.GENERAL, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000010000,
+  Piece(PieceType.ADVISOR, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000101000,
+  Piece(PieceType.ELEPHANT, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_001000100,
+  Piece(PieceType.HORSE, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_010000010,
+  Piece(PieceType.CHARIOT, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_100000001,
+  Piece(PieceType.SOLDIER, Color.BLACK): 0b000000000_000000000_000000000_101010101_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.CANNON, Color.BLACK): 0b000000000_000000000_010000010_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.GENERAL, Color.BLACK): 0b000010000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.ADVISOR, Color.BLACK): 0b000101000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.ELEPHANT, Color.BLACK): 0b001000100_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.HORSE, Color.BLACK): 0b010000010_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+  Piece(PieceType.CHARIOT, Color.BLACK): 0b100000001_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+}
+
+BB_VERTICAL = 0b100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000
+BB_HORIZONTAL = 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_111111111
+
+
+@dataclass()
 class Move:
   from_square: Square
   to_square: Square
@@ -101,56 +90,29 @@ class Move:
 
 class Board:
   def __init__(self):
-    # fmt: off
-    self.solider  = STARTING_POSITION[Color.RED][PieceType.SOLDIER]  | STARTING_POSITION[Color.BLACK][PieceType.SOLDIER]
-    self.cannon   = STARTING_POSITION[Color.RED][PieceType.CANNON]   | STARTING_POSITION[Color.BLACK][PieceType.CANNON]
-    self.general  = STARTING_POSITION[Color.RED][PieceType.GENERAL]  | STARTING_POSITION[Color.BLACK][PieceType.GENERAL]
-    self.advisor  = STARTING_POSITION[Color.RED][PieceType.ADVISOR]  | STARTING_POSITION[Color.BLACK][PieceType.ADVISOR]
-    self.elephant = STARTING_POSITION[Color.RED][PieceType.ELEPHANT] | STARTING_POSITION[Color.BLACK][PieceType.ELEPHANT]
-    self.horse    = STARTING_POSITION[Color.RED][PieceType.HORSE]    | STARTING_POSITION[Color.BLACK][PieceType.HORSE]
-    self.chariot  = STARTING_POSITION[Color.RED][PieceType.CHARIOT]  | STARTING_POSITION[Color.BLACK][PieceType.CHARIOT]
-    # fmt: on
-
-    self.occupied_color = {
-      Color.RED: reduce(lambda x, y: x | y, STARTING_POSITION[Color.RED].values()),
-      Color.BLACK: reduce(lambda x, y: x | y, STARTING_POSITION[Color.BLACK].values()),
-    }
-    self.occupied = self.occupied_color[Color.RED] | self.occupied_color[Color.BLACK]
-    self.moves: Queue[Move] = Queue(maxsize=0)
+    # LOL Fix this
+    import copy
+    self.pieces = copy.deepcopy(BB_STARTING_POSITION)
     self.turn = Color.RED
+    self.moves: Queue[Move] = Queue(maxsize=0)
+
+  def occupied(self) -> int:
+    return reduce( lambda x, y: x | y, list(self.pieces.values()))
+
+  def occupied_color(self, color: Color) -> int:
+    return reduce(lambda x, y: x | y, [v for k, v in self.pieces.items() if k.color == color])
 
   def piece_at(self, s: Square) -> Optional[Piece]:
-    piece_type = self.piece_type_at(s)
-    color = self.color_at(s)
-    if color is None or piece_type is None:
-      return None
-    return Piece(piece_type, color)
-    
-
-  def piece_type_at(self, s: Square) -> Optional[PieceType]:
     mask = self.mask(s)
-    if not (self.occupied & mask):
-      return None
-    if self.solider & mask:
-      return PieceType.SOLDIER
-    if self.cannon & mask:
-      return PieceType.CANNON
-    if self.general & mask:
-      return PieceType.GENERAL
-    if self.advisor & mask:
-      return PieceType.ADVISOR
-    if self.elephant & mask:
-      return PieceType.ELEPHANT
-    if self.horse & mask:
-      return PieceType.HORSE
-    if self.chariot & mask:
-      return PieceType.CHARIOT
+    for k, v in self.pieces.items():
+      if v & mask:
+        return k
 
   def color_at(self, s: Square) -> Optional[Color]:
     mask = self.mask(s)
-    if not (self.occupied & mask):
+    if not (self.occupied() & mask):
       return None
-    return Color.RED if (self.occupied_color[Color.RED] & mask) else Color.BLACK
+    return Color.RED if (self.occupied_color(Color.RED) & mask) else Color.BLACK
 
   @staticmethod
   def mask(s: Square) -> int:
@@ -159,15 +121,15 @@ class Board:
   def push(self, move: Move):
     piece_at = self.piece_at(move.from_square)
     fm, tm = self.mask(move.from_square), self.mask(move.to_square)
-    piece_at.bit = (piece_at.bit ^ fm) | tm
+    self.pieces[piece_at] = (self.pieces[piece_at] ^ fm) | tm
     self.moves.put(move)
 
   def pop(self):
     return self.moves.get()
 
-  def __repr__(self):
+  def __str__(self):
     ret = ""
     for i in range(RANKS):
-      row = " ".join(str(s) if (s := self.piece_at(s=Square(i * FILES + j))) is not None else "." for j in range(FILES))
+      row = " ".join((str(s) if (s := self.piece_at(s=Square(i * FILES + j))) is not None else ".") for j in range(FILES))
       ret = f"{row}\n{ret}"
     return ret
