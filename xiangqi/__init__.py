@@ -88,6 +88,8 @@ BB_STARTING_POSITION: dict[Piece, int] = {
 
 BB_VERTICAL = 0b000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001
 BB_HORIZONTAL = 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_111111111
+RED_RIVER = Square.I5  # Cross river if larger
+BLACK_RIVER = Square.A6  # Cross river if smaller
 BB_ALL = (1 << 90) - 1
 
 
@@ -108,8 +110,7 @@ class Board:
 
     # self.pieces = copy.deepcopy(BB_STARTING_POSITION)
     self.pieces = {
-      Piece(PieceType.CANNON, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_110000011_000000000_000000000,
-      Piece(PieceType.CHARIOT, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000010000_000000000_000000000_000000000_100000001,
+      Piece(PieceType.SOLDIER, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_101010101_000000000_000000000_000000000,
       Piece(PieceType.CANNON, Color.BLACK): 0b000000000_000000000_010000011_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
       Piece(PieceType.CHARIOT, Color.BLACK): 0b100000001_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
     }
@@ -163,6 +164,10 @@ class Board:
       print(_bb_to_str(moves))
       print(_bb_to_str(self.occupied()))
       yield from (Move(s, i) for i in self.bb_to_squares(moves))
+    if p.piece_type == PieceType.SOLDIER:
+      if p.color == Color.RED:
+        if s > RED_RIVER:
+          yield [Move(s, Square(s.value - 1))]
 
   def push(self, move: Move):
     piece_from, piece_to = self.piece_at(move.from_square), self.piece_at(move.to_square)

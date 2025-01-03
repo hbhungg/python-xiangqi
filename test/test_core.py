@@ -84,3 +84,14 @@ def test_cannon_legal_moves():
   assert Move(Square.B3, Square.C4) in m
   # assert Move(Square.A1, Square.A4) not in m
   # assert Move(Square.A1, Square.A2) in m
+
+
+def test_soldier_legal_moves():
+  from pprint import pprint
+
+  b = Board()
+  print(b)
+  m = list(b._generate_legal_moves(Square.A4))
+  pprint(m)
+  # assert Move(Square.A1, Square.A4) not in m
+  # assert Move(Square.A1, Square.A2) in m
