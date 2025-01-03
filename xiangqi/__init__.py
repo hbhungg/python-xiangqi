@@ -1,13 +1,21 @@
 from enum import Enum, auto
 from queue import Queue
-from typing import Optional
-from dataclasses import dataclass, field
+from typing import Iterator, Optional
+from dataclasses import dataclass
 from functools import reduce
 
 RANKS = 10
 FILES = 9
 RANK_NAMES = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
 FILE_NAMES = ["a", "b", "c", "d", "e", "f", "g", "h", "i"]
+
+
+def _bb_to_str(bitboard: int):
+  ret = ""
+  for rank in range(RANKS):
+    row = " ".join([f"{(1 if bitboard & (1 << (rank * FILES + file)) else '.')}" for file in range(FILES)])
+    ret = f"{row}\n{ret}"
+  return f"\n{ret}"
 
 
 class PieceType(Enum):
@@ -78,8 +86,9 @@ BB_STARTING_POSITION: dict[Piece, int] = {
   Piece(PieceType.CHARIOT, Color.BLACK): 0b100000001_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
 }
 
-BB_VERTICAL = 0b100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000_100000000
+BB_VERTICAL = 0b000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001_000000001
 BB_HORIZONTAL = 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_111111111
+BB_ALL = (1 << 90) - 1
 
 
 @dataclass()
@@ -88,16 +97,27 @@ class Move:
   to_square: Square
 
 
+class IllegalMoveError(Exception):
+  pass
+
+
 class Board:
   def __init__(self):
     # LOL Fix this
     import copy
-    self.pieces = copy.deepcopy(BB_STARTING_POSITION)
+
+    # self.pieces = copy.deepcopy(BB_STARTING_POSITION)
+    self.pieces = {
+      Piece(PieceType.CANNON, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000000000_000000000_110000011_000000000_000000000,
+      Piece(PieceType.CHARIOT, Color.RED): 0b000000000_000000000_000000000_000000000_000000000_000010000_000000000_000000000_000000000_100000001,
+      Piece(PieceType.CANNON, Color.BLACK): 0b000000000_000000000_010000011_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+      Piece(PieceType.CHARIOT, Color.BLACK): 0b100000001_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000_000000000,
+    }
     self.turn = Color.RED
     self.moves: Queue[Move] = Queue(maxsize=0)
 
   def occupied(self) -> int:
-    return reduce( lambda x, y: x | y, list(self.pieces.values()))
+    return reduce(lambda x, y: x | y, list(self.pieces.values()))
 
   def occupied_color(self, color: Color) -> int:
     return reduce(lambda x, y: x | y, [v for k, v in self.pieces.items() if k.color == color])
@@ -118,10 +138,49 @@ class Board:
   def mask(s: Square) -> int:
     return 1 << s.value
 
+  def bb_to_squares(self, bb: int) -> Iterator[Square]:
+    for s in Square:
+      if self.mask(s) & bb:
+        yield s
+
+  def _generate_legal_moves(self, s: Square) -> Iterator[Move]:
+    m = self.mask(s)
+    if not (self.occupied() & m):
+      return
+    p = self.piece_at(s)
+    _bv = (BB_VERTICAL << s.value % FILES) & ~m
+    _bh = (BB_HORIZONTAL << (s.value - s.value % FILES)) & ~m
+    _bb_vh = _bv | _bh
+
+    if p.piece_type == PieceType.CHARIOT:
+      moves = _bb_vh & (~self.occupied_color(p.color))
+      print(_bb_to_str(_bv & self.occupied()))
+      print(_bb_to_str(self.occupied()))
+      yield from (Move(s, i) for i in self.bb_to_squares(moves))
+    if p.piece_type == PieceType.CANNON:
+      print(s.value)
+      moves = _bb_vh & (~self.occupied_color(p.color))
+      print(_bb_to_str(moves))
+      print(_bb_to_str(self.occupied()))
+      yield from (Move(s, i) for i in self.bb_to_squares(moves))
+
   def push(self, move: Move):
-    piece_at = self.piece_at(move.from_square)
+    piece_from, piece_to = self.piece_at(move.from_square), self.piece_at(move.to_square)
+    if piece_from is None:
+      raise IllegalMoveError(f"{move.from_square} is empty")
     fm, tm = self.mask(move.from_square), self.mask(move.to_square)
-    self.pieces[piece_at] = (self.pieces[piece_at] ^ fm) | tm
+
+    # Check if move is legal
+    if piece_to is not None:
+      if piece_from.color is not piece_to.color:
+        self.pieces[piece_to] = self.pieces[piece_to] ^ tm
+      else:
+        raise IllegalMoveError("Cannot capture your own pieces")
+
+    # Place down
+    self.pieces[piece_from] = self.pieces[piece_from] | tm
+    # Pick up
+    self.pieces[piece_from] = self.pieces[piece_from] ^ fm
     self.moves.put(move)
 
   def pop(self):
@@ -132,4 +191,4 @@ class Board:
     for i in range(RANKS):
       row = " ".join((str(s) if (s := self.piece_at(s=Square(i * FILES + j))) is not None else ".") for j in range(FILES))
       ret = f"{row}\n{ret}"
-    return ret
+    return f"\n{ret}"
