@@ -1,6 +1,6 @@
-use libxiangqi::subtract;
+use libxiangqi::Game;
 
 fn main() {
-  let a = subtract(2, 2);
-  println!("{a}");
+  let game = Game::new();
+  game.print_board();
 }
