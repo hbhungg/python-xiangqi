@@ -21,4 +21,5 @@ module-name = "libxiangqi._libxiangqi"
 dev = [
   "maturin>=1.10.2",
   "maturin-import-hook>=0.3.0",
+  "mypy>=1.19.0",
 ]
