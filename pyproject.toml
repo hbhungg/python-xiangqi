@@ -1,0 +1,24 @@
+[project]
+name = "libxiangqi"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+  { name = "hbhungg", email = "hung.ba.huynh@proton.me" }
+]
+requires-python = ">=3.11"
+dependencies = []
+
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[tool.maturin]
+features = ["pyo3/extension-module"]
+module-name = "libxiangqi._libxiangqi"
+
+[dependency-groups]
+dev = [
+  "maturin>=1.10.2",
+  "maturin-import-hook>=0.3.0",
+]
