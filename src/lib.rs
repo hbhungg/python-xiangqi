@@ -346,6 +346,45 @@ impl Game {
       }
     }
   }
+
+  pub fn get_legal_moves(&self) -> Vec<(u8, u8, u8, u8)> {
+    let mut moves = Vec::new();
+    
+    for from_rank in 0..RANK_SZ {
+      for from_file in 0..FILE_SZ {
+        if let Some(piece) = self.get_piece(from_file, from_rank) {
+          if piece.side != self.turn { continue; }
+          
+          for to_rank in 0..RANK_SZ {
+            for to_file in 0..FILE_SZ {
+              // Check destination
+              if let Some(dest) = self.get_piece(to_file, to_rank) {
+                if dest.side == piece.side { continue; }
+              }
+              
+              let is_capture = self.get_piece(to_file, to_rank).is_some();
+              
+              let is_valid = match piece.piece_type {
+                PieceType::General => self.is_valid_general_move(from_file, from_rank, to_file, to_rank, piece.side),
+                PieceType::Advisor => self.is_valid_advisor_move(from_file, from_rank, to_file, to_rank, piece.side),
+                PieceType::Elephant => self.is_valid_elephant_move(from_file, from_rank, to_file, to_rank, piece.side),
+                PieceType::Horse => self.is_valid_horse_move(from_file, from_rank, to_file, to_rank),
+                PieceType::Chariot => self.is_valid_chariot_move(from_file, from_rank, to_file, to_rank),
+                PieceType::Cannon => self.is_valid_cannon_move(from_file, from_rank, to_file, to_rank, is_capture),
+                PieceType::Soldier => self.is_valid_soldier_move(from_file, from_rank, to_file, to_rank, piece.side),
+              };
+              
+              if is_valid {
+                moves.push((from_file, from_rank, to_file, to_rank));
+              }
+            }
+          }
+        }
+      }
+    }
+    
+    moves
+  }
   
   // Main function to validate and execute a move
   pub fn make_move(&mut self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8) -> Result<(), String> {
