@@ -1,7 +1,7 @@
 [project]
 name = "libxiangqi"
 version = "0.1.0"
-description = "Add your description here"
+description = "xiangqi library for Python"
 readme = "README.md"
 authors = [
   { name = "hbhungg", email = "hung.ba.huynh@proton.me" }
@@ -22,4 +22,19 @@ dev = [
   "maturin>=1.10.2",
   "maturin-import-hook>=0.3.0",
   "mypy>=1.19.0",
+  "ruff>=0.14.10",
 ]
+
+
+[tool.ruff]
+line-length = 150
+indent-width = 2
+preview = true
+
+[tool.ruff.lint.isort]
+split-on-trailing-comma = false
+
+[tool.ruff.format]
+quote-style = "double"
+docstring-code-format = true
+skip-magic-trailing-comma = true
