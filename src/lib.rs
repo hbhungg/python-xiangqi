@@ -549,9 +549,6 @@ impl Game {
 #[pymodule]
 #[pyo3(name = "_libxiangqi")]
 fn _libxiangqi(m: &Bound<'_, PyModule>) -> PyResult<()> {
-  m.add_class::<PieceType>()?;
-  m.add_class::<Side>()?;
-  m.add_class::<Piece>()?;
   m.add_class::<Game>()?;
   m.add("IllegalMove", m.py().get_type::<IllegalMove>())?;
   Ok(())
