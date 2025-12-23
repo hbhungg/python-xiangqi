@@ -1,4 +1,7 @@
+use pyo3::create_exception;
 use pyo3::prelude::*;
+
+create_exception!(libxiangqi, IllegalMove, pyo3::exceptions::PyException);
 
 #[pyclass]
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -19,6 +22,7 @@ pub enum Side {
   Black,
 }
 
+#[pyclass]
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
   piece_type: PieceType,
@@ -110,7 +114,9 @@ fn crossed_river(rank: u8, side: Side) -> bool {
   }
 }
 
+#[pymethods]
 impl Game {
+  #[new]
   pub fn new() -> Self {
     let mut board = [OUT_OF_BOUNDS; 144];
 
@@ -434,19 +440,24 @@ impl Game {
   }
 
   // Main function to validate and execute a move
-  pub fn make_move(&mut self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8) -> Result<(), String> {
+  pub fn make_move(&mut self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8) -> PyResult<()> {
     // Check positions are valid
-    let from_idx = pos_to_idx(from_file, from_rank).ok_or("Invalid from position")?;
-    let to_idx = pos_to_idx(to_file, to_rank).ok_or("Invalid to position")?;
+    // let from_idx = pos_to_idx(from_file, from_rank).ok_or("Invalid from position")?;
+    // let to_idx = pos_to_idx(to_file, to_rank).ok_or("Invalid to position")?;
+    let from_idx = pos_to_idx(from_file, from_rank)
+        .ok_or_else(|| IllegalMove::new_err(format!("Invalid from position ({from_file}, {from_rank})")))?;
+
+    let to_idx = pos_to_idx(to_file, to_rank)
+        .ok_or_else(|| IllegalMove::new_err(format!("Invalid to position ({to_file}, {to_rank})")))?;
 
     // Check there's a piece at source
     let piece = self
       .get_piece(from_file, from_rank)
-      .ok_or("No piece at source position")?;
+      .ok_or_else(|| IllegalMove::new_err(format!("({from_file}, {from_rank}) has no piece")))?;
 
     // Check it's the correct player's turn
     if piece.side != self.turn {
-      return Err("Not your turn".to_string());
+      return Err(IllegalMove::new_err("Not turn"));
     }
 
     // Check destination
@@ -456,7 +467,7 @@ impl Game {
     // Can't capture own piece
     if let Some(dest) = dest_piece {
       if dest.side == piece.side {
-        return Err("Cannot capture own piece".to_string());
+        return Err(IllegalMove::new_err("Cannot capture own piece"));
       }
     }
 
@@ -472,7 +483,7 @@ impl Game {
     };
 
     if !is_valid {
-      return Err(format!("Invalid move for {:?}", piece.piece_type));
+      return Err(IllegalMove::new_err(format!("Invalid move for {:?}", piece.piece_type)));
     }
 
     // Execute the move
@@ -535,59 +546,20 @@ impl Game {
   }
 }
 
-#[pyfunction]
-pub fn add(left: u64, right: u64) -> u64 {
-  left + right
-}
-
-pub fn subtract(left: u64, right: u64) -> u64 {
-  left - right
-}
-
 #[pymodule]
 #[pyo3(name = "_libxiangqi")]
 fn _libxiangqi(m: &Bound<'_, PyModule>) -> PyResult<()> {
-  m.add_function(wrap_pyfunction!(add, m)?)?;
+  m.add_class::<PieceType>()?;
+  m.add_class::<Side>()?;
+  m.add_class::<Piece>()?;
+  m.add_class::<Game>()?;
+  m.add("IllegalMove", m.py().get_type::<IllegalMove>())?;
   Ok(())
-}
-
-fn main() {
-  let mut game = Game::new();
-  game.print_board();
-
-  println!("\n=== Testing some moves ===");
-
-  // Red soldier forward
-  match game.make_move(4, 3, 4, 4) {
-    Ok(_) => println!("✓ Red soldier moved forward"),
-    Err(e) => println!("✗ Error: {}", e),
-  }
-  game.print_board();
-
-  // Black soldier forward
-  match game.make_move(4, 6, 4, 5) {
-    Ok(_) => println!("✓ Black soldier moved forward"),
-    Err(e) => println!("✗ Error: {}", e),
-  }
-  game.print_board();
-
-  // Red cannon forward
-  match game.make_move(1, 2, 1, 5) {
-    Ok(_) => println!("✓ Red cannon moved forward"),
-    Err(e) => println!("✗ Error: {}", e),
-  }
-  game.print_board();
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
-
-  #[test]
-  fn it_works() {
-    let result = add(2, 2);
-    assert_eq!(result, 4);
-  }
 
   #[test]
   fn test_soldier_moves() {
