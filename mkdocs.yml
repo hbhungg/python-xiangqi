@@ -1,0 +1,5 @@
+site_name: My site
+site_url: https://hbhungg.github.io/libxiangqi
+theme:
+  name: material
+

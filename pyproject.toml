@@ -6,6 +6,11 @@ readme = "README.md"
 authors = [
   { name = "hbhungg", email = "hung.ba.huynh@proton.me" }
 ]
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Rust",
+]
+
 requires-python = ">=3.11"
 dependencies = []
 
@@ -21,6 +26,7 @@ module-name = "libxiangqi._libxiangqi"
 dev = [
   "maturin>=1.10.2",
   "maturin-import-hook>=0.3.0",
+  "mkdocs-material>=9.7.1",
   "mypy>=1.19.0",
   "pytest>=9.0.2",
   "ruff>=0.14.10",
