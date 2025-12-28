@@ -18,6 +18,7 @@ jobs:
       - uses: astral-sh/setup-uv@v7
         with:
           version: "0.8.3"
+          enable-cache: true
       - uses: actions/cache@v4
         with:
           key: mkdocs-material-${{ env.cache_id }}
