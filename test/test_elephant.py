@@ -1,10 +1,10 @@
 import pytest
-from libxiangqi import Game, IllegalMove
+from libxiangqi import Board, IllegalMove
 
 
 def test_red_elephant_move_diagonal():
     """Test red elephant can move two steps diagonally"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -15,7 +15,7 @@ def test_red_elephant_move_diagonal():
 
 def test_black_elephant_move_diagonal():
     """Test black elephant can move two steps diagonally"""
-    g = Game()
+    g = Board()
     # Red move
     g.make_move(4, 3, 4, 4)
 
@@ -25,7 +25,7 @@ def test_black_elephant_move_diagonal():
 
 def test_elephant_blocked_by_piece():
     """Test elephant cannot jump over pieces (elephant eye blocked)"""
-    g = Game()
+    g = Board()
     # Soldier is at (4,3), blocking elephant at (2,0) from moving to (4,2)
     # because the midpoint (3,1) needs to be checked, but (4,3) blocks the path indirectly
 
@@ -85,7 +85,7 @@ def test_elephant_blocked_by_piece():
 
 def test_red_elephant_cannot_cross_river():
     """Test red elephant cannot cross the river (rank > 4)"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -103,7 +103,7 @@ def test_red_elephant_cannot_cross_river():
 
 def test_black_elephant_cannot_cross_river():
     """Test black elephant cannot cross the river (rank < 5)"""
-    g = Game()
+    g = Board()
     # Red move
     g.make_move(4, 3, 4, 4)
 
@@ -120,7 +120,7 @@ def test_black_elephant_cannot_cross_river():
 
 def test_elephant_cannot_move_one_step():
     """Test elephant must move exactly 2 diagonal steps"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -132,7 +132,7 @@ def test_elephant_cannot_move_one_step():
 
 def test_elephant_cannot_move_orthogonally():
     """Test elephant cannot move in straight lines"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)

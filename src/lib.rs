@@ -17,7 +17,7 @@ pub enum PieceType {
 
 #[pyclass]
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Side {
+pub enum Color {
   Red,
   Black,
 }
@@ -26,12 +26,117 @@ pub enum Side {
 #[derive(Clone, Copy, Debug)]
 pub struct Piece {
   piece_type: PieceType,
-  side: Side,
+  color: Color,
+}
+
+#[pyclass]
+#[derive(Debug, PartialEq, Eq)]
+pub enum Square {
+  A1 = 0,
+  B1 = 1,
+  C1 = 2,
+  D1 = 3,
+  E1 = 4,
+  F1 = 5,
+  G1 = 6,
+  H1 = 7,
+  I1 = 8,
+  A2 = 9,
+  B2 = 10,
+  C2 = 11,
+  D2 = 12,
+  E2 = 13,
+  F2 = 14,
+  G2 = 15,
+  H2 = 16,
+  I2 = 17,
+  A3 = 18,
+  B3 = 19,
+  C3 = 20,
+  D3 = 21,
+  E3 = 22,
+  F3 = 23,
+  G3 = 24,
+  H3 = 25,
+  I3 = 26,
+  A4 = 27,
+  B4 = 28,
+  C4 = 29,
+  D4 = 30,
+  E4 = 31,
+  F4 = 32,
+  G4 = 33,
+  H4 = 34,
+  I4 = 35,
+  A5 = 36,
+  B5 = 37,
+  C5 = 38,
+  D5 = 39,
+  E5 = 40,
+  F5 = 41,
+  G5 = 42,
+  H5 = 43,
+  I5 = 44,
+  A6 = 45,
+  B6 = 46,
+  C6 = 47,
+  D6 = 48,
+  E6 = 49,
+  F6 = 50,
+  G6 = 51,
+  H6 = 52,
+  I6 = 53,
+  A7 = 54,
+  B7 = 55,
+  C7 = 56,
+  D7 = 57,
+  E7 = 58,
+  F7 = 59,
+  G7 = 60,
+  H7 = 61,
+  I7 = 62,
+  A8 = 63,
+  B8 = 64,
+  C8 = 65,
+  D8 = 66,
+  E8 = 67,
+  F8 = 68,
+  G8 = 69,
+  H8 = 70,
+  I8 = 71,
+  A9 = 72,
+  B9 = 73,
+  C9 = 74,
+  D9 = 75,
+  E9 = 76,
+  F9 = 77,
+  G9 = 78,
+  H9 = 79,
+  I9 = 80,
+  A10 = 81,
+  B10 = 82,
+  C10 = 83,
+  D10 = 84,
+  E10 = 85,
+  F10 = 86,
+  G10 = 87,
+  H10 = 88,
+  I10 = 89,
+}
+
+#[pyclass]
+#[derive(Debug, PartialEq, Eq)]
+pub struct Move {
+  from_square: Square,
+  to_square: Square,
 }
 
 impl Piece {
-  pub fn new(piece_type: PieceType, side: Side) -> Self {
-    Piece { piece_type, side }
+  pub fn new(piece_type: PieceType, side: Color) -> Self {
+    Piece {
+      piece_type,
+      color: side,
+    }
   }
 
   fn to_u8(self) -> u8 {
@@ -45,9 +150,9 @@ impl Piece {
       PieceType::Soldier => 7,
     };
 
-    let color_flag = match self.side {
-      Side::Red => 0,
-      Side::Black => 0b00010000,
+    let color_flag = match self.color {
+      Color::Red => 0,
+      Color::Black => 0b00010000,
     };
 
     piece_val | color_flag
@@ -72,8 +177,11 @@ impl Piece {
       _ => return None,
     };
 
-    let side = if is_black { Side::Black } else { Side::Red };
-    Some(Piece { piece_type, side })
+    let side = if is_black { Color::Black } else { Color::Red };
+    Some(Piece {
+      piece_type,
+      color: side,
+    })
   }
 }
 
@@ -83,9 +191,9 @@ const RANK_SZ: u8 = 10; // Height
 const FILE_SZ: u8 = 9; // Width
 
 #[pyclass]
-pub struct Game {
+pub struct Board {
   board: [u8; 144],
-  turn: Side,
+  turn: Color,
 }
 
 pub fn pos_to_idx(file: u8, rank: u8) -> Option<usize> {
@@ -96,26 +204,26 @@ pub fn pos_to_idx(file: u8, rank: u8) -> Option<usize> {
 }
 
 // Helper to check if position is in palace
-fn in_palace(file: u8, rank: u8, side: Side) -> bool {
+fn in_palace(file: u8, rank: u8, side: Color) -> bool {
   if file < 3 || file > 5 {
     return false;
   }
   match side {
-    Side::Red => rank <= 2,
-    Side::Black => rank >= 7,
+    Color::Red => rank <= 2,
+    Color::Black => rank >= 7,
   }
 }
 
 // Helper to check if position has crossed river
-fn crossed_river(rank: u8, side: Side) -> bool {
+fn crossed_river(rank: u8, side: Color) -> bool {
   match side {
-    Side::Red => rank > 4,
-    Side::Black => rank < 5,
+    Color::Red => rank > 4,
+    Color::Black => rank < 5,
   }
 }
 
 #[pymethods]
-impl Game {
+impl Board {
   #[new]
   pub fn new() -> Self {
     let mut board = [OUT_OF_BOUNDS; 144];
@@ -128,52 +236,55 @@ impl Game {
       }
     }
 
-    let mut game = Game { board, turn: Side::Red };
+    let mut game = Board {
+      board,
+      turn: Color::Red,
+    };
 
     // Red pieces (rank 0-4)
-    game.set_piece(0, 0, PieceType::Chariot, Side::Red);
-    game.set_piece(1, 0, PieceType::Horse, Side::Red);
-    game.set_piece(2, 0, PieceType::Elephant, Side::Red);
-    game.set_piece(3, 0, PieceType::Advisor, Side::Red);
-    game.set_piece(4, 0, PieceType::General, Side::Red);
-    game.set_piece(5, 0, PieceType::Advisor, Side::Red);
-    game.set_piece(6, 0, PieceType::Elephant, Side::Red);
-    game.set_piece(7, 0, PieceType::Horse, Side::Red);
-    game.set_piece(8, 0, PieceType::Chariot, Side::Red);
+    game.set_piece(0, 0, PieceType::Chariot, Color::Red);
+    game.set_piece(1, 0, PieceType::Horse, Color::Red);
+    game.set_piece(2, 0, PieceType::Elephant, Color::Red);
+    game.set_piece(3, 0, PieceType::Advisor, Color::Red);
+    game.set_piece(4, 0, PieceType::General, Color::Red);
+    game.set_piece(5, 0, PieceType::Advisor, Color::Red);
+    game.set_piece(6, 0, PieceType::Elephant, Color::Red);
+    game.set_piece(7, 0, PieceType::Horse, Color::Red);
+    game.set_piece(8, 0, PieceType::Chariot, Color::Red);
 
-    game.set_piece(1, 2, PieceType::Cannon, Side::Red);
-    game.set_piece(7, 2, PieceType::Cannon, Side::Red);
+    game.set_piece(1, 2, PieceType::Cannon, Color::Red);
+    game.set_piece(7, 2, PieceType::Cannon, Color::Red);
 
-    game.set_piece(0, 3, PieceType::Soldier, Side::Red);
-    game.set_piece(2, 3, PieceType::Soldier, Side::Red);
-    game.set_piece(4, 3, PieceType::Soldier, Side::Red);
-    game.set_piece(6, 3, PieceType::Soldier, Side::Red);
-    game.set_piece(8, 3, PieceType::Soldier, Side::Red);
+    game.set_piece(0, 3, PieceType::Soldier, Color::Red);
+    game.set_piece(2, 3, PieceType::Soldier, Color::Red);
+    game.set_piece(4, 3, PieceType::Soldier, Color::Red);
+    game.set_piece(6, 3, PieceType::Soldier, Color::Red);
+    game.set_piece(8, 3, PieceType::Soldier, Color::Red);
 
     // Black pieces (rank 5-9)
-    game.set_piece(0, 9, PieceType::Chariot, Side::Black);
-    game.set_piece(1, 9, PieceType::Horse, Side::Black);
-    game.set_piece(2, 9, PieceType::Elephant, Side::Black);
-    game.set_piece(3, 9, PieceType::Advisor, Side::Black);
-    game.set_piece(4, 9, PieceType::General, Side::Black);
-    game.set_piece(5, 9, PieceType::Advisor, Side::Black);
-    game.set_piece(6, 9, PieceType::Elephant, Side::Black);
-    game.set_piece(7, 9, PieceType::Horse, Side::Black);
-    game.set_piece(8, 9, PieceType::Chariot, Side::Black);
+    game.set_piece(0, 9, PieceType::Chariot, Color::Black);
+    game.set_piece(1, 9, PieceType::Horse, Color::Black);
+    game.set_piece(2, 9, PieceType::Elephant, Color::Black);
+    game.set_piece(3, 9, PieceType::Advisor, Color::Black);
+    game.set_piece(4, 9, PieceType::General, Color::Black);
+    game.set_piece(5, 9, PieceType::Advisor, Color::Black);
+    game.set_piece(6, 9, PieceType::Elephant, Color::Black);
+    game.set_piece(7, 9, PieceType::Horse, Color::Black);
+    game.set_piece(8, 9, PieceType::Chariot, Color::Black);
 
-    game.set_piece(1, 7, PieceType::Cannon, Side::Black);
-    game.set_piece(7, 7, PieceType::Cannon, Side::Black);
+    game.set_piece(1, 7, PieceType::Cannon, Color::Black);
+    game.set_piece(7, 7, PieceType::Cannon, Color::Black);
 
-    game.set_piece(0, 6, PieceType::Soldier, Side::Black);
-    game.set_piece(2, 6, PieceType::Soldier, Side::Black);
-    game.set_piece(4, 6, PieceType::Soldier, Side::Black);
-    game.set_piece(6, 6, PieceType::Soldier, Side::Black);
-    game.set_piece(8, 6, PieceType::Soldier, Side::Black);
+    game.set_piece(0, 6, PieceType::Soldier, Color::Black);
+    game.set_piece(2, 6, PieceType::Soldier, Color::Black);
+    game.set_piece(4, 6, PieceType::Soldier, Color::Black);
+    game.set_piece(6, 6, PieceType::Soldier, Color::Black);
+    game.set_piece(8, 6, PieceType::Soldier, Color::Black);
 
     game
   }
 
-  pub fn set_piece(&mut self, file: u8, rank: u8, piece_type: PieceType, side: Side) -> Option<()> {
+  pub fn set_piece(&mut self, file: u8, rank: u8, piece_type: PieceType, side: Color) -> Option<()> {
     let idx = pos_to_idx(file, rank)?;
     self.board[idx] = Piece::new(piece_type, side).to_u8();
     Some(())
@@ -189,7 +300,7 @@ impl Game {
   }
 
   // Check if a move is valid for General
-  fn is_valid_general_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Side) -> bool {
+  fn is_valid_general_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Color) -> bool {
     // Must stay in palace
     if !in_palace(to_file, to_rank, side) {
       return false;
@@ -203,7 +314,7 @@ impl Game {
   }
 
   // Check if a move is valid for Advisor
-  fn is_valid_advisor_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Side) -> bool {
+  fn is_valid_advisor_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Color) -> bool {
     // Must stay in palace
     if !in_palace(to_file, to_rank, side) {
       return false;
@@ -217,15 +328,15 @@ impl Game {
   }
 
   // Check if a move is valid for Elephant
-  fn is_valid_elephant_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Side) -> bool {
+  fn is_valid_elephant_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Color) -> bool {
     // Cannot cross river
     match side {
-      Side::Red => {
+      Color::Red => {
         if to_rank > 4 {
           return false;
         }
       },
-      Side::Black => {
+      Color::Black => {
         if to_rank < 5 {
           return false;
         }
@@ -362,14 +473,14 @@ impl Game {
   }
 
   // Check if a move is valid for Soldier
-  fn is_valid_soldier_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Side) -> bool {
+  fn is_valid_soldier_move(&self, from_file: u8, from_rank: u8, to_file: u8, to_rank: u8, side: Color) -> bool {
     let file_diff = (from_file as i8 - to_file as i8).abs();
     let rank_diff = from_rank as i8 - to_rank as i8;
 
     let has_crossed = crossed_river(from_rank, side);
 
     match side {
-      Side::Red => {
+      Color::Red => {
         // Red moves up (increasing rank)
         if rank_diff == -1 && file_diff == 0 {
           // Forward move always allowed
@@ -381,7 +492,7 @@ impl Game {
           false
         }
       },
-      Side::Black => {
+      Color::Black => {
         // Black moves down (decreasing rank)
         if rank_diff == 1 && file_diff == 0 {
           // Forward move always allowed
@@ -402,7 +513,7 @@ impl Game {
     for from_rank in 0..RANK_SZ {
       for from_file in 0..FILE_SZ {
         if let Some(piece) = self.get_piece(from_file, from_rank) {
-          if piece.side != self.turn {
+          if piece.color != self.turn {
             continue;
           }
 
@@ -410,7 +521,7 @@ impl Game {
             for to_file in 0..FILE_SZ {
               // Check destination
               if let Some(dest) = self.get_piece(to_file, to_rank) {
-                if dest.side == piece.side {
+                if dest.color == piece.color {
                   continue;
                 }
               }
@@ -418,13 +529,13 @@ impl Game {
               let is_capture = self.get_piece(to_file, to_rank).is_some();
 
               let is_valid = match piece.piece_type {
-                PieceType::General => self.is_valid_general_move(from_file, from_rank, to_file, to_rank, piece.side),
-                PieceType::Advisor => self.is_valid_advisor_move(from_file, from_rank, to_file, to_rank, piece.side),
-                PieceType::Elephant => self.is_valid_elephant_move(from_file, from_rank, to_file, to_rank, piece.side),
+                PieceType::General => self.is_valid_general_move(from_file, from_rank, to_file, to_rank, piece.color),
+                PieceType::Advisor => self.is_valid_advisor_move(from_file, from_rank, to_file, to_rank, piece.color),
+                PieceType::Elephant => self.is_valid_elephant_move(from_file, from_rank, to_file, to_rank, piece.color),
                 PieceType::Horse => self.is_valid_horse_move(from_file, from_rank, to_file, to_rank),
                 PieceType::Chariot => self.is_valid_chariot_move(from_file, from_rank, to_file, to_rank),
                 PieceType::Cannon => self.is_valid_cannon_move(from_file, from_rank, to_file, to_rank, is_capture),
-                PieceType::Soldier => self.is_valid_soldier_move(from_file, from_rank, to_file, to_rank, piece.side),
+                PieceType::Soldier => self.is_valid_soldier_move(from_file, from_rank, to_file, to_rank, piece.color),
               };
 
               if is_valid {
@@ -445,10 +556,10 @@ impl Game {
     // let from_idx = pos_to_idx(from_file, from_rank).ok_or("Invalid from position")?;
     // let to_idx = pos_to_idx(to_file, to_rank).ok_or("Invalid to position")?;
     let from_idx = pos_to_idx(from_file, from_rank)
-        .ok_or_else(|| IllegalMove::new_err(format!("Invalid from position ({from_file}, {from_rank})")))?;
+      .ok_or_else(|| IllegalMove::new_err(format!("Invalid from position ({from_file}, {from_rank})")))?;
 
     let to_idx = pos_to_idx(to_file, to_rank)
-        .ok_or_else(|| IllegalMove::new_err(format!("Invalid to position ({to_file}, {to_rank})")))?;
+      .ok_or_else(|| IllegalMove::new_err(format!("Invalid to position ({to_file}, {to_rank})")))?;
 
     // Check there's a piece at source
     let piece = self
@@ -456,7 +567,7 @@ impl Game {
       .ok_or_else(|| IllegalMove::new_err(format!("({from_file}, {from_rank}) has no piece")))?;
 
     // Check it's the correct player's turn
-    if piece.side != self.turn {
+    if piece.color != self.turn {
       return Err(IllegalMove::new_err("Not turn"));
     }
 
@@ -466,20 +577,20 @@ impl Game {
 
     // Can't capture own piece
     if let Some(dest) = dest_piece {
-      if dest.side == piece.side {
+      if dest.color == piece.color {
         return Err(IllegalMove::new_err("Cannot capture own piece"));
       }
     }
 
     // Validate move based on piece type
     let is_valid = match piece.piece_type {
-      PieceType::General => self.is_valid_general_move(from_file, from_rank, to_file, to_rank, piece.side),
-      PieceType::Advisor => self.is_valid_advisor_move(from_file, from_rank, to_file, to_rank, piece.side),
-      PieceType::Elephant => self.is_valid_elephant_move(from_file, from_rank, to_file, to_rank, piece.side),
+      PieceType::General => self.is_valid_general_move(from_file, from_rank, to_file, to_rank, piece.color),
+      PieceType::Advisor => self.is_valid_advisor_move(from_file, from_rank, to_file, to_rank, piece.color),
+      PieceType::Elephant => self.is_valid_elephant_move(from_file, from_rank, to_file, to_rank, piece.color),
       PieceType::Horse => self.is_valid_horse_move(from_file, from_rank, to_file, to_rank),
       PieceType::Chariot => self.is_valid_chariot_move(from_file, from_rank, to_file, to_rank),
       PieceType::Cannon => self.is_valid_cannon_move(from_file, from_rank, to_file, to_rank, is_capture),
-      PieceType::Soldier => self.is_valid_soldier_move(from_file, from_rank, to_file, to_rank, piece.side),
+      PieceType::Soldier => self.is_valid_soldier_move(from_file, from_rank, to_file, to_rank, piece.color),
     };
 
     if !is_valid {
@@ -492,8 +603,8 @@ impl Game {
 
     // Switch turns
     self.turn = match self.turn {
-      Side::Red => Side::Black,
-      Side::Black => Side::Red,
+      Color::Red => Color::Black,
+      Color::Black => Color::Red,
     };
 
     Ok(())
@@ -522,9 +633,9 @@ impl Game {
               PieceType::Cannon => 'C',
               PieceType::Soldier => 'S',
             };
-            match piece.side {
-              Side::Red => base,
-              Side::Black => base.to_lowercase().next().unwrap(),
+            match piece.color {
+              Color::Red => base,
+              Color::Black => base.to_lowercase().next().unwrap(),
             }
           } else {
             '?'
@@ -544,43 +655,19 @@ impl Game {
     }
     println!();
   }
+
+  pub fn turn(&self) -> bool {
+    match self.turn {
+      Color::Red => true,
+      Color::Black => false,
+    }
+  }
 }
 
 #[pymodule]
 #[pyo3(name = "_libxiangqi")]
 fn _libxiangqi(m: &Bound<'_, PyModule>) -> PyResult<()> {
-  m.add_class::<Game>()?;
+  m.add_class::<Board>()?;
   m.add("IllegalMove", m.py().get_type::<IllegalMove>())?;
   Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_soldier_moves() {
-    let mut game = Game::new();
-
-    // Red soldier can move forward
-    assert!(game.make_move(4, 3, 4, 4).is_ok());
-
-    // Black soldier can move forward
-    assert!(game.make_move(4, 6, 4, 5).is_ok());
-
-    // Red soldier can't move sideways before crossing river
-    assert!(game.make_move(2, 3, 3, 3).is_err());
-  }
-
-  #[test]
-  fn test_chariot_moves() {
-    let mut game = Game::new();
-
-    // Move soldier out of the way
-    game.make_move(0, 3, 0, 4).unwrap();
-    game.make_move(0, 6, 0, 5).unwrap();
-
-    // Chariot can now move forward
-    assert!(game.make_move(0, 0, 0, 3).is_ok());
-  }
 }

@@ -1,10 +1,10 @@
 import pytest
-from libxiangqi import Game, IllegalMove
+from libxiangqi import Board, IllegalMove
 
 
 def test_red_general_move_forward():
     """Test red general can move forward one step within palace"""
-    g = Game()
+    g = Board()
     # Move soldier out of the way
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -15,7 +15,7 @@ def test_red_general_move_forward():
 
 def test_red_general_move_sideways():
     """Test red general can move sideways within palace"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -26,7 +26,7 @@ def test_red_general_move_sideways():
 
 def test_black_general_move():
     """Test black general can move within palace"""
-    g = Game()
+    g = Board()
     # Red move
     g.make_move(4, 3, 4, 4)
 
@@ -36,7 +36,7 @@ def test_black_general_move():
 
 def test_general_cannot_leave_palace_horizontal():
     """Test general cannot move outside palace horizontally"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -48,7 +48,7 @@ def test_general_cannot_leave_palace_horizontal():
 
 def test_general_cannot_leave_palace_vertical():
     """Test red general cannot move outside palace vertically (rank > 2)"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -66,7 +66,7 @@ def test_general_cannot_leave_palace_vertical():
 
 def test_general_cannot_move_diagonally():
     """Test general cannot move diagonally"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -78,7 +78,7 @@ def test_general_cannot_move_diagonally():
 
 def test_general_cannot_move_two_steps():
     """Test general cannot move more than one step"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)

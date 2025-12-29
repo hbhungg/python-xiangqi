@@ -1,10 +1,10 @@
 import pytest
-from libxiangqi import Game, IllegalMove
+from libxiangqi import Board, IllegalMove
 
 
 def test_red_advisor_move_diagonal():
     """Test red advisor can move diagonally within palace"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -15,7 +15,7 @@ def test_red_advisor_move_diagonal():
 
 def test_black_advisor_move_diagonal():
     """Test black advisor can move diagonally within palace"""
-    g = Game()
+    g = Board()
     # Red move
     g.make_move(4, 3, 4, 4)
 
@@ -25,7 +25,7 @@ def test_black_advisor_move_diagonal():
 
 def test_advisor_cannot_move_orthogonally():
     """Test advisor cannot move in straight lines (only diagonal)"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -37,7 +37,7 @@ def test_advisor_cannot_move_orthogonally():
 
 def test_advisor_cannot_leave_palace():
     """Test advisor must stay within palace"""
-    g = Game()
+    g = Board()
     # Move pieces to set up
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -55,7 +55,7 @@ def test_advisor_cannot_leave_palace():
 
 def test_advisor_cannot_move_two_steps():
     """Test advisor can only move one diagonal step"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -67,7 +67,7 @@ def test_advisor_cannot_move_two_steps():
 
 def test_advisor_all_positions():
     """Test advisor can reach all valid palace positions"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)

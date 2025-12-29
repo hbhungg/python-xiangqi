@@ -1,23 +1,23 @@
 import pytest
-from libxiangqi import Game, IllegalMove
+from libxiangqi import Board, IllegalMove
 
 
 def test_red_soldier_move():
     """Test red soldier can move forward"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
 
 
 def test_black_soldier_move():
     """Test black soldier can move forward"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
 
 
 def test_red_soldier_no_move_sideway_before_river():
     """Test red soldier cannot move sideways before crossing river"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
     with pytest.raises(IllegalMove):
@@ -26,7 +26,7 @@ def test_red_soldier_no_move_sideway_before_river():
 
 def test_black_soldier_no_move_sideway_before_river():
     """Test black soldier cannot move sideways before crossing river"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
     g.make_move(0, 3, 0, 4)
@@ -37,7 +37,7 @@ def test_black_soldier_no_move_sideway_before_river():
 
 def test_red_soldier_move_sideway_after_river():
     """Test red soldier can move sideways after crossing river"""
-    g = Game()
+    g = Board()
     # Move soldier across river (rank > 4)
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -50,7 +50,7 @@ def test_red_soldier_move_sideway_after_river():
 
 def test_black_soldier_move_sideway_after_river():
     """Test black soldier can move sideways after crossing river"""
-    g = Game()
+    g = Board()
     # Move black soldier across river (rank < 5)
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -64,7 +64,7 @@ def test_black_soldier_move_sideway_after_river():
 
 def test_red_soldier_cannot_move_backward():
     """Test red soldier cannot move backward"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
 
@@ -74,7 +74,7 @@ def test_red_soldier_cannot_move_backward():
 
 def test_black_soldier_cannot_move_backward():
     """Test black soldier cannot move backward"""
-    g = Game()
+    g = Board()
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
 
@@ -84,21 +84,21 @@ def test_black_soldier_cannot_move_backward():
 
 def test_soldier_cannot_move_diagonally():
     """Test soldier cannot move diagonally"""
-    g = Game()
+    g = Board()
     with pytest.raises(IllegalMove):
         g.make_move(4, 3, 5, 4)
 
 
 def test_soldier_cannot_move_two_steps():
     """Test soldier can only move one step at a time"""
-    g = Game()
+    g = Board()
     with pytest.raises(IllegalMove):
         g.make_move(4, 3, 4, 5)
 
 
 def test_red_soldier_forward_always_allowed():
     """Test red soldier can always move forward regardless of river"""
-    g = Game()
+    g = Board()
     # Before river
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -111,7 +111,7 @@ def test_red_soldier_forward_always_allowed():
 
 def test_black_soldier_forward_always_allowed():
     """Test black soldier can always move forward regardless of river"""
-    g = Game()
+    g = Board()
     # Before river
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -125,7 +125,7 @@ def test_black_soldier_forward_always_allowed():
 
 def test_soldier_capture():
     """Test soldier can capture enemy pieces"""
-    g = Game()
+    g = Board()
     # Move soldiers toward each other
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -138,7 +138,7 @@ def test_soldier_capture():
 
 def test_soldier_sideways_capture_after_river():
     """Test soldier can capture sideways after crossing river"""
-    g = Game()
+    g = Board()
     # Get red soldier across river
     g.make_move(4, 3, 4, 4)
     g.make_move(3, 6, 3, 5)
@@ -151,7 +151,7 @@ def test_soldier_sideways_capture_after_river():
 
 def test_red_soldier_at_river_boundary():
     """Test red soldier at rank 4 (river boundary) can still only move forward"""
-    g = Game()
+    g = Board()
     # Move to rank 4
     g.make_move(4, 3, 4, 4)
     g.make_move(0, 6, 0, 5)
@@ -163,7 +163,7 @@ def test_red_soldier_at_river_boundary():
 
 def test_black_soldier_at_river_boundary():
     """Test black soldier at rank 5 (river boundary) can still only move forward"""
-    g = Game()
+    g = Board()
     # Move to rank 5
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -176,7 +176,7 @@ def test_black_soldier_at_river_boundary():
 
 def test_red_soldier_just_crossed_river():
     """Test red soldier at rank 5 (just crossed) can move sideways"""
-    g = Game()
+    g = Board()
     # Cross river to rank 5
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -189,7 +189,7 @@ def test_red_soldier_just_crossed_river():
 
 def test_black_soldier_just_crossed_river():
     """Test black soldier at rank 4 (just crossed) can move sideways"""
-    g = Game()
+    g = Board()
     # Cross river to rank 4
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)
@@ -203,7 +203,7 @@ def test_black_soldier_just_crossed_river():
 
 def test_soldier_cannot_move_sideways_both_directions_at_once():
     """Test soldier can only move one direction at a time"""
-    g = Game()
+    g = Board()
     # Cross river
     g.make_move(4, 3, 4, 4)
     g.make_move(4, 6, 4, 5)

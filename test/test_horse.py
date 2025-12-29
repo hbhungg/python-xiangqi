@@ -1,17 +1,17 @@
 import pytest
-from libxiangqi import Game, IllegalMove
+from libxiangqi import Board, IllegalMove
 
 
 def test_red_horse_move_l_shape():
     """Test red horse can move in L-shape (2 forward, 1 sideways)"""
-    g = Game()
+    g = Board()
     # Horse at (1,0) can move to (2,2)
     g.make_move(1, 0, 2, 2)
 
 
 def test_black_horse_move_l_shape():
     """Test black horse can move in L-shape"""
-    g = Game()
+    g = Board()
     # Red move
     g.make_move(1, 0, 2, 2)
 
@@ -21,7 +21,7 @@ def test_black_horse_move_l_shape():
 
 def test_horse_all_l_directions():
     """Test horse can move in all 8 L-shape directions"""
-    g = Game()
+    g = Board()
     # Move horse to open area
     g.make_move(1, 0, 2, 2)
     g.make_move(1, 9, 2, 7)
@@ -36,7 +36,7 @@ def test_horse_all_l_directions():
 
 def test_horse_blocked_by_piece():
     """Test horse cannot jump when leg is blocked"""
-    g = Game()
+    g = Board()
     # Horse at (1,0) is blocked by elephant at (2,0) from moving to (3,1)
     # The blocking piece is in the direction of the longer movement
 
@@ -47,14 +47,14 @@ def test_horse_blocked_by_piece():
 
 def test_horse_not_blocked_diagonal():
     """Test horse is not blocked by diagonal pieces"""
-    g = Game()
+    g = Board()
     # Horse at (1,0), cannon at (1,2), horse should be able to move to (2,2)
     g.make_move(1, 0, 2, 2)
 
 
 def test_horse_blocked_horizontally():
     """Test horse blocked when moving horizontally more"""
-    g = Game()
+    g = Board()
     # Move soldier out
     g.make_move(2, 3, 2, 4)
     g.make_move(2, 6, 2, 5)
@@ -78,7 +78,7 @@ def test_horse_blocked_horizontally():
 
 def test_horse_blocked_vertically():
     """Test horse blocked when moving vertically more"""
-    g = Game()
+    g = Board()
     # Move soldier out
     g.make_move(2, 3, 2, 4)
     g.make_move(1, 6, 1, 5)
@@ -96,7 +96,7 @@ def test_horse_blocked_vertically():
 
 def test_horse_cannot_move_straight():
     """Test horse cannot move in straight lines"""
-    g = Game()
+    g = Board()
     # Move soldier
     g.make_move(1, 3, 1, 4)
     g.make_move(1, 6, 1, 5)
@@ -108,7 +108,7 @@ def test_horse_cannot_move_straight():
 
 def test_horse_cannot_move_diagonally():
     """Test horse cannot move diagonally"""
-    g = Game()
+    g = Board()
     # Try to move horse diagonally
     with pytest.raises(IllegalMove):
         g.make_move(1, 0, 2, 1)
@@ -116,7 +116,7 @@ def test_horse_cannot_move_diagonally():
 
 def test_horse_cannot_move_one_square():
     """Test horse cannot move just one square"""
-    g = Game()
+    g = Board()
     # Try to move horse one square
     with pytest.raises(IllegalMove):
         g.make_move(1, 0, 1, 1)
