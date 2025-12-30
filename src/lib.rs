@@ -3,6 +3,11 @@ use pyo3::prelude::*;
 
 create_exception!(libxiangqi, IllegalMove, pyo3::exceptions::PyException);
 
+const OUT_OF_BOUNDS: u8 = 255;
+const EMPTY: u8 = 0;
+const RANK_SZ: u8 = 10; // Height
+const FILE_SZ: u8 = 9; // Width
+
 #[pyclass]
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum PieceType {
@@ -184,11 +189,6 @@ impl Piece {
     })
   }
 }
-
-const OUT_OF_BOUNDS: u8 = 255;
-const EMPTY: u8 = 0;
-const RANK_SZ: u8 = 10; // Height
-const FILE_SZ: u8 = 9; // Width
 
 #[pyclass]
 pub struct Board {
@@ -610,12 +610,9 @@ impl Board {
     Ok(())
   }
 
-  pub fn print_board(&self) {
-    println!("\nCurrent turn: {:?}", self.turn);
-    // Print from rank 9 down to 0 (so rank 0 is at bottom)
+  pub fn ascii(&self) -> String {
+    let mut output = String::new();
     for rank in (0..RANK_SZ).rev() {
-      print!("{} ", rank);
-
       for file in 0..FILE_SZ {
         if let Some(idx) = pos_to_idx(file, rank) {
           let piece_val = self.board[idx];
@@ -640,20 +637,17 @@ impl Board {
           } else {
             '?'
           };
-          print!("{} ", symbol);
+          output.push(symbol);
+          output.push(' ');
         } else {
-          print!("X ");
+          output.push_str("X ");
         }
       }
-      println!();
+      output.push('\n');
     }
+    output.push('\n');
 
-    // Print file numbers at bottom
-    print!("  ");
-    for file in 0..FILE_SZ {
-      print!("{} ", file);
-    }
-    println!();
+    output
   }
 
   pub fn turn(&self) -> bool {

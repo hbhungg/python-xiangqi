@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>libxiangqi</title>
+  <link rel="stylesheet" href="/assets/xiangqiboardjs-0.3.3/css/xiangqiboard-0.3.3.min.css">
+  <style>
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      margin-bottom: 20px;
+    }
+    /* Performance optimizations for smoother dragging */
+    .board-1ef78 img {
+      will-change: transform;
+    }
+    img[data-draggable="true"] {
+      transform: translateZ(0);
+      backface-visibility: hidden;
+    }
+  </style>
+</head>
+<body>
+  <h1>libxiangqi</h1>
+  <div id="board" style="width: 450px"></div>
+  <button id="resetBtn">Reset Board</button>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+  <script src="/assets/xiangqiboardjs-0.3.3/js/xiangqiboard-0.3.3.min.js"></script>
+  <script>
+    function onDrop(source, target, piece, newPos, oldPos, orientation) {
+      if (target == "offboard") { return 'snapback' }
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/move', false);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      try {
+        xhr.send(JSON.stringify({ source, target, piece, orientation }));
+        const data = JSON.parse(xhr.responseText);
+        console.debug('Server data:', data);
+        if (!data.valid) { return 'snapback'; }
+      } catch (error) {
+        console.error('Error:', error);
+        return 'snapback';
+      }
+    }
+
+    const board = Xiangqiboard('board', {
+      draggable: true,
+      dropOffBoard: 'snapback',
+      position: 'start',
+      showNotation: true,
+      pieceTheme: 'img/xiangqipieces/wikimedia/{piece}.svg',
+      onDrop: onDrop
+    });
+    $('#resetBtn').on('click', board.start)
+  </script>
+</body>
+</html>
